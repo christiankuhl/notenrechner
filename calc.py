@@ -4,8 +4,9 @@ from numpy import mean
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import os
-# from io import BytesIO
-# from PIL import Image
+import markdown
+from io import BytesIO
+from PIL import Image
 
 RANGES = [[0, .19], [.20, .26], [.27, .33],[.34, .40], [.41, .45],
           [.46, .50], [.51, .55],[.56, .60], [.61, .65], [.66, .70],
@@ -33,7 +34,34 @@ class HTML(IODevice):
         plt.savefig(".temp/figure.png", format='png')
     @staticmethod
     def output(klausur):
+        ergebnis = "\n".join([" | ".join(map(str, [n, k.punkte, k.note])) for (n, k) in klausur.items()])
+        bar = ":" + "---:|:" * 15 + "---:"
+        werte = " | ".join(map(str, klausur.notenspiegel.values()))
+        noten = " | ".join(map(str, range(16)))
+        kriterien = "\n".join([" | ".join(map(str, [n, l, h])) for (n, [l, h]) in klausur.criteria().items()])
+        text = """
+# Ergebnisse
+Klausur   |   Punkte   |   Note
+:--------:|-----------:|---------:
+{0}
+
+# Notenspiegel
+{1}
+{3}
+{4}
+
+[(.temp/figure.png)]
+
+# Kriterien
+Note   |   Von   |   Bis
+:-----:|--------:|---------:
+{2}""".format(ergebnis, noten, kriterien, bar, werte)
+        result = markdown.markdown(text, extensions=['markdown.extensions.tables'],
+                                                        output_format='html5')
+        with open("out.html", "w") as file_handle:
+            file_handle.write(result)
         plt.show()
+
 
 class PDF(HTML):
     @staticmethod
