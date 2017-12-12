@@ -2,18 +2,45 @@
 from singleton_decorator import singleton
 from numpy import mean
 from collections import OrderedDict
+import matplotlib.pyplot as plt
+import os
+# from io import BytesIO
+# from PIL import Image
 
 RANGES = [[0, .19], [.20, .26], [.27, .33],[.34, .40], [.41, .45],
           [.46, .50], [.51, .55],[.56, .60], [.61, .65], [.66, .70],
           [.71, .75],[.76, .80], [.81, .85], [.86, .90], [.91, .95],
           [.96, float("inf")]]
 
-class PDF(object):
+class IODevice(object):
+    @staticmethod
+    def init_handler():
+        pass
+    def exit_handler():
+        pass
+
+class HTML(IODevice):
+    @staticmethod
+    def init_handler():
+        if not os.path.exists(".temp"):
+            os.mkdir(".temp")
+    @staticmethod
+    def exit_handler():
+        os.remove(".temp/figure.png")
+        os.rmdir(".temp")
+    @staticmethod
+    def handle_figure(klausur):
+        plt.savefig(".temp/figure.png", format='png')
+    @staticmethod
+    def output(klausur):
+        plt.show()
+
+class PDF(HTML):
     @staticmethod
     def output(klausur):
         pass
 
-class Terminal(object):
+class Terminal(IODevice):
     @staticmethod
     def init():
         n = int(input("Wie viele Aufgaben gibt es? "))
@@ -22,6 +49,11 @@ class Terminal(object):
             p = float(input("Wie viele Punkte gibt es auf Aufgabe {}? ".format(i)))
             max_points[i] = p
         return max_points
+
+    @staticmethod
+    def handle_figure(klausur):
+        klausur.figure = BytesIO()
+        plt.savefig(klausur.figure, format='png')
 
     @staticmethod
     def output(klausur):
@@ -50,6 +82,11 @@ class Terminal(object):
         for n, [l, h] in list(criteria.items())[:-1]:
             print("Note {0}: von {1} bis {2} Punkten".format(n, l, h))
         print("Note 15: ab {} Punkten".format(criteria[15][0]))
+        plt.show()
+        # klausur.figure.seek(0)
+        # im = Image.open(klausur.figure)
+        # im.show()
+        # klausur.figure.close()
 
     @staticmethod
     def input():
@@ -72,13 +109,20 @@ class Terminal(object):
 
 @singleton
 class Klausur(dict):
-    def __init__(self, output=Terminal, input=Terminal, *args, **kwargs):
+    def __init__(self, output=HTML, input=Terminal, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.OutputDevice = output
         self.InputDevice = input
         self.notenspiegel = OrderedDict({n: 0 for n in range(16)})
         self.max_points = self.InputDevice.init()
         self.total = sum(self.max_points.values())
+
+    def __enter__(self):
+        self.OutputDevice.init_handler()
+        return self
+
+    def __exit__(self, *args):
+        self.OutputDevice.exit_handler()
 
     def rh(self, n):
         r = [p/2 for p in range(2*round(self.total) + 1) if self.note(p/2) == n]
@@ -104,6 +148,7 @@ class Klausur(dict):
 
     def calculate(self):
         self.average = mean([a.note for a in self.values()])
+        self.create_histogram()
 
     def output(self):
         self.OutputDevice.output(self)
@@ -121,6 +166,14 @@ class Klausur(dict):
         boese.sort(key=lambda a: a[1].punkte, reverse=True)
         return boese[:round(len(self)/2)-len(boese)]
 
+    def create_histogram(self):
+        plt.title("Notenspiegel")
+        plt.xlabel("Note")
+        plt.ylabel("Frequenz")
+        bins = [r - .5 for r in range(17)]
+        plt.xticks(range(16))
+        plt.hist([a.note for a in self.values()], bins=bins, facecolor='blue', alpha=0.5)
+        self.OutputDevice.handle_figure(self)
 
 class KlausurAbgabe(object):
     def __init__(self, punkte):
@@ -135,7 +188,7 @@ class KlausurAbgabe(object):
 
 
 if __name__ == '__main__':
-    K = Klausur()
-    K.input()
-    K.calculate()
-    K.output()
+    with Klausur() as K:
+        K.input()
+        K.calculate()
+        K.output()
