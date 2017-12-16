@@ -7,6 +7,7 @@ import os
 import markdown
 from io import BytesIO
 from PIL import Image
+import json
 
 RANGES = [[0, .19], [.20, .26], [.27, .33],[.34, .40], [.41, .45],
           [.46, .50], [.51, .55],[.56, .60], [.61, .65], [.66, .70],
@@ -62,6 +63,35 @@ Note   |   Von   |   Bis
             file_handle.write(result)
         plt.show()
 
+
+class File(IODevice):
+    @staticmethod
+    def init():
+        with open("klausur.out", "r") as file_handle:
+            max_points = json.loads(file_handle.readline())
+        return max_points
+
+    def input():
+        klausuren = []
+        with open("klausur.out", "r") as file_handle:
+            data = list(file_handle)[1:]
+        for row in data:
+            row = json.loads(row)
+            points_dict = dict(zip(Klausur().max_points, row))
+            klausuren.append(KlausurAbgabe(points_dict))
+        return klausuren
+
+
+    @staticmethod
+    def output(klausur):
+        with open("klausur.out", "w") as file_handle:
+            file_handle.write(json.dumps(klausur.max_points) + "\n")
+            for abgabe in klausur.values():
+                file_handle.write(json.dumps(list(abgabe.points.values())) + "\n")
+
+    @staticmethod
+    def handle_figure(klausur):
+        pass
 
 class PDF(HTML):
     @staticmethod
@@ -137,7 +167,7 @@ class Terminal(IODevice):
 
 @singleton
 class Klausur(dict):
-    def __init__(self, output=HTML, input=Terminal, *args, **kwargs):
+    def __init__(self, output=HTML, input=File, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.OutputDevice = output
         self.InputDevice = input
