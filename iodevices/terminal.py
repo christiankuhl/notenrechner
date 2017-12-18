@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 from PIL import Image
 from . import IODevice
-from klausur import KlausurAbgabe
+from klausur import KlausurAbgabe, Klausur
 
 class Terminal(IODevice):
     @staticmethod

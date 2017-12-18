@@ -49,6 +49,7 @@ class Klausur(dict):
 
     def calculate(self):
         self.average = mean([a.note for a in self.values()])
+        self.aufg_avg = [mean([a.points[i]/self.max_points[i] for a in self.values()]) for i in self.max_points]
         self.create_histogram()
 
     def output(self):
