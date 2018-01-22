@@ -3,7 +3,7 @@ from klausur import Klausur
 from iodevices import File, HTML, Terminal
 
 if __name__ == '__main__':
-    with Klausur(input=Terminal, output=HTML) as K:
+    with Klausur(input=HTML, output=HTML) as K:
         K.input()
-        K.calculate()
-        K.output()
+        # K.calculate()
+        # K.output()

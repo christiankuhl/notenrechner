@@ -9,3 +9,4 @@ from .file import *
 from .html import *
 from .pdf import *
 from .terminal import *
+from .templates import *
