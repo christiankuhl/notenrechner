@@ -1,0 +1,21 @@
+{% extends "notenrechner/model_base.html" %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Klasse</th>
+      <th>Jahrgang</th>
+      <th>Anzahl Schüler</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for klasse in klassen %}
+    <tr>
+      <td><a href="{% url 'notenrechner:klasse' klasse.id %}">{{klasse.name}}</a></td>
+      <td>{{klasse.jahrgang}}</td>
+      <td>{{klasse.anzahl_schueler}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

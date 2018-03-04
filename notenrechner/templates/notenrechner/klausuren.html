@@ -1,0 +1,27 @@
+{% extends "notenrechner/model_base.html" %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Klasse</th>
+      <th>Fach</th>
+      <th>Nummer</th>
+      <th>Titel</th>
+      <th>Anzahl Aufgaben</th>
+      <th>Anzahl Abgaben</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for klausur in klausuren %}
+    <tr>
+      <td><a href="{% url 'notenrechner:klasse' klausur.klasse.id %}">{{klausur.klasse.name}}, {{klausur.klasse.jahrgang}}</a></td>
+      <td>{{klausur.fach}}</td>
+      <td>{{klausur.nummer}}</td>
+      <td><a href="{% url 'notenrechner:klausur' klausur.id %}">{{klausur.titel}}</h></td>
+      <td>{{klausur.anzahl_aufgaben}}</td>
+      <td>{{klausur.anzahl_abgaben}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

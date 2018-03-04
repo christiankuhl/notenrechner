@@ -1,0 +1,19 @@
+{% extends "notenrechner/model_base.html" %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Vorname</th>
+      <th>Nachname</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for schueler in klasse.schueler.all %}
+    <tr>
+      <td>{{schueler.vorname}}</td>
+      <td>{{schueler.nachname}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

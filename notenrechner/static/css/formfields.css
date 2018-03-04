@@ -1,0 +1,12 @@
+.formfields>thead>tr, .formfields>tbody>tr {
+  display: block;
+  float: left;
+  border-bottom: none;
+  border-top: none;
+}
+
+.formfields>thead>tr>th, .formfields>tbody>tr>td {
+  display: block;
+  border-bottom: none;
+  border-top: none;
+}
