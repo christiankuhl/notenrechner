@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body %}
+<section class="header">
+  <h2 class="title">Willkommen{{ greeting }}.</h2>
+  <div class="row">
+    <div class="three columns value-prop"></div>
+    <div class="six columns">
+      <form action="{% url 'notenrechner:overview' %}" method=post>
+        {% csrf_token %}
+        <div>
+          <input type="submit" class="button button-primary" value="Los geht's">
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
