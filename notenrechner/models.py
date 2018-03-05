@@ -21,8 +21,12 @@ class Schueler(models.Model):
     vorname = models.CharField(max_length=60)
     nachname = models.CharField(max_length=60)
     klassen = models.ManyToManyField(Klasse, related_name="schueler")
+    def __repr__(self):
+        return ", ".join([self.nachname, self.vorname])
+    __str__ = __repr__
     class Meta:
         unique_together = ("vorname", "nachname")
+        ordering = ('nachname', )
 
 class Klausur(models.Model):
     klasse = models.ForeignKey(Klasse, related_name="klausuren", null=True, on_delete=models.SET_NULL)
@@ -37,10 +41,10 @@ class Klausur(models.Model):
 
 class Aufgabe(models.Model):
     klausur = models.ForeignKey(Klausur, related_name="aufgaben", on_delete=models.CASCADE)
-    aufgabe = models.PositiveSmallIntegerField()
+    nummer = models.PositiveSmallIntegerField()
     max_punkte = models.DecimalField(decimal_places=1, max_digits=4)
     class Meta:
-        unique_together = ("klausur", "aufgabe")
+        unique_together = ("klausur", "nummer")
 
 class Abgabe(models.Model):
     klausur = models.ForeignKey(Klausur, related_name="abgaben", on_delete=models.CASCADE)
@@ -50,7 +54,7 @@ class Abgabe(models.Model):
 
 class AufgabenAbgabe(models.Model):
     abgabe = models.ForeignKey(Abgabe, related_name="aufgaben", on_delete=models.CASCADE)
-    aufgabe = models.PositiveSmallIntegerField()
-    punkte = models.DecimalField(decimal_places=1, max_digits=4)
+    aufgabe = models.ForeignKey(Aufgabe, on_delete=models.CASCADE)
+    punkte = models.DecimalField(decimal_places=1, max_digits=4, null=True)
     class Meta:
         unique_together = ("abgabe", "aufgabe")

@@ -1,5 +1,35 @@
-{% extends "notenrechner/model_base.html" %}
-{{form.management_form}}
-{% for aufg in form.forms %}
-{{ aufg }}
-{% endfor %}
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/formfields.css' %}">
+{% endblock %}
+
+{% block body %}
+<section class="header">
+  <div class="row">
+    <div class="title">{{ content_title }}</div>
+    <div class="one column"></div>
+    <div class="ten columns">
+      <form action="{{ form_action }}" method=post>
+        {% csrf_token %}
+        <table class="formfields">
+        </table>
+        <input type="submit" value="Anlegen">
+    </div>
+  </div>
+  <div class="row">
+    <table class="formfields">
+      {{ form }}
+    </table>
+    <table class="formfields">
+      {{ formset.management_form }}
+      {% for abgabe in formset.forms %}
+        {{ abgabe }}
+      {% endfor %}
+    </table>
+  </form>
+  </div>
+</section>
+{% endblock %}

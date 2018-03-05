@@ -2,12 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from notenrechner.models import Klasse, Schueler, Klausur, Aufgabe
-from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabeForm
-from django.forms.models import inlineformset_factory
+from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabenForm#, AufgabenInlineFormSet
+from django.forms import formset_factory
 
-def enter_klausur(request, form):
-    pass
-
+@login_required
 def view_klasse(request, klassen_id):
     klasse = get_object_or_404(Klasse, pk=klassen_id)
     title = "Klasse {}, {}".format(klasse.name, klasse.jahrgang)
@@ -29,6 +27,7 @@ def view_klasse(request, klassen_id):
                        "content_title": title,
                        "klasse": klasse})
 
+@login_required
 def view_klassen(request):
     klassen = Klasse.objects.all()
     if request.method == "POST":
@@ -47,22 +46,33 @@ def view_klassen(request):
                        "content_title": "Klassen",
                        "klassen": klassen})
 
+@login_required
 def view_klausur(request, klausur_id):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
-    AufgabenFormSet = inlineformset_factory(Klausur, Aufgabe, exclude=[],
-                                            can_delete=False, extra=10,
-                                            max_num=klausur.anzahl_aufgaben)
-    formset = AufgabenFormSet(instance=klausur)
+    AufgabenFormSet = formset_factory(AufgabenForm)
+    initial = [{**{"schueler": abg.schueler},
+                **{"aufgabe_{}".format(a.aufgabe.nummer): a.punkte
+                                for a in abg.aufgaben.all()}}
+                                    for abg in klausur.abgaben.all()]
     if request.method == "POST":
-        formset = AufgabenFormSet(request.POST, instance=klausur)
+        form = AufgabenForm(klausur, data=request.POST)
+        formset =  AufgabenFormSet(initial=initial,
+                                   data=request.POST,
+                                   form_kwargs={"klausur": klausur,
+                                                "create_abgabe": True})
+        if form.is_valid():
+            form.save()
         if formset.is_valid():
-            formset.save()
-        return render(request, "notenrechner/klausur.html",
-                      {"form": formset})
+            for aufg_form in formset:
+                aufg_form.save()
     else:
-        return render(request, "notenrechner/klausur.html",
-                  {"form": formset})
+        form = AufgabenForm(klausur)
+        formset = AufgabenFormSet(initial=initial, form_kwargs={"klausur": klausur, "create_abgabe": True})
+    return HttpResponse(formset)
+    # return render(request, "notenrechner/klausur.html", {"form": form,
+                                                        #  "formset": formset})
 
+@login_required
 def view_klausuren(request):
     klausuren = Klausur.objects.all()
     if request.method == "POST":
