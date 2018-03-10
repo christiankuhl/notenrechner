@@ -60,17 +60,17 @@ def view_klausur(request, klausur_id):
                                    data=request.POST,
                                    form_kwargs={"klausur": klausur,
                                                 "create_abgabe": True})
-        if form.is_valid():
-            form.save()
+        # if form.is_valid():
+        #     form.save()
         if formset.is_valid():
             for aufg_form in formset:
                 aufg_form.save()
     else:
         form = AufgabenForm(klausur)
         formset = AufgabenFormSet(initial=initial, form_kwargs={"klausur": klausur, "create_abgabe": True})
-    return HttpResponse(formset)
-    # return render(request, "notenrechner/klausur.html", {"form": form,
-                                                        #  "formset": formset})
+    # return HttpResponse(formset)
+    return render(request, "notenrechner/klausur.html", {"form": form,
+                                                         "formset": formset})
 
 @login_required
 def view_klausuren(request):
