@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.formsets import BaseFormSet, DELETION_FIELD_NAME
 from djangoformsetjs.utils import formset_media_js
 from notenrechner.models import Schueler, Klasse, Klausur, Aufgabe, Abgabe, AufgabenAbgabe
 
@@ -80,5 +81,10 @@ class AufgabenForm(forms.Form):
     class Media(object):
         js = formset_media_js
 
-AufgabenFormSet = forms.formset_factory(AufgabenForm, can_delete=True)
-AufgabenFormSet.fields["DELETE"].widget.attrs["style"] = "display:none"
+class MyFormSet(BaseFormSet):
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        if self.can_delete:
+            form.fields[DELETION_FIELD_NAME].widget.attrs["style"] = "display:none"
+
+AufgabenFormSet = forms.formset_factory(AufgabenForm, formset=MyFormSet, can_delete=True)

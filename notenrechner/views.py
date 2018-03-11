@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from notenrechner.models import Klasse, Schueler, Klausur, Aufgabe
 from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabenForm, AufgabenFormSet
-from django.forms import formset_factory
+# from django.forms import formset_factory
 
 @login_required
 def view_klasse(request, klassen_id):
