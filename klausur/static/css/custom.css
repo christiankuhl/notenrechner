@@ -5,6 +5,20 @@
   word-wrap: break-word;
 }
 
+.vcenter{
+   display: inline-block;
+   float: none;
+   margin-right: 0;
+   vertical-align: middle;
+}
+
+.refblock{
+   display: inline-block;
+   float: none;
+   vertical-align: middle;
+}
+
+
 /*title class behaves like h2*/
 .title {
   margin-top: 0;

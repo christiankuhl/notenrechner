@@ -1,4 +1,8 @@
 from django.db import models
+from klausur.constants import RANGES
+from collections import OrderedDict
+from numpy import mean
+import klausur.util as util
 
 class Fach(models.Model):
     name = models.CharField(max_length=20)
@@ -34,21 +38,51 @@ class Klausur(models.Model):
     nummer = models.PositiveSmallIntegerField()
     titel = models.CharField(max_length=100)
     anzahl_aufgaben = models.PositiveSmallIntegerField(default=3, verbose_name="Aufgaben")
+    def total(self):
+        return sum(a.max_punkte for a in self.aufgaben.all())
     def anzahl_abgaben(self):
         return len(self.abgaben.all())
+    def notenspiegel(self):
+        result = OrderedDict({n: 0 for n in range(16)})
+        for abgabe in self.abgaben.all():
+            result[abgabe.note()] += 1
+        return result
+    def durchschnitt(self):
+        return mean([a.note() for a in self.abgaben.all()])
+    def _range(self, n):
+        r = [p/2 for p in range(2*round(self.total()) + 1) if util.note(float(p/(2*self.total()))) == n]
+        if r:
+            return [min(r), max(r)]
+        else:
+            return ["N/A", "N/A"]
+    def kriterien(self):
+        return OrderedDict({n: self._range(n) for n in range(16)})
+    def zulaessig(self):
+        return len([a for a in self.abgaben.all() if a.note() < 5]) <= self.anzahl_abgaben()/2
+    def beste_boese(self):
+        boese = [a for a in self.abgaben.all() if a.note() < 5]
+        boese.sort(key=lambda a: a.punkte(), reverse=True)
+        return boese[:round(self.anzahl_abgaben()/2)-len(boese)]
+
     class Meta:
         unique_together = ("fach", "klasse", "nummer")
 
 class Aufgabe(models.Model):
     klausur = models.ForeignKey(Klausur, related_name="aufgaben", on_delete=models.CASCADE)
     nummer = models.PositiveSmallIntegerField()
-    max_punkte = models.DecimalField(decimal_places=1, max_digits=4)
+    max_punkte = models.DecimalField(decimal_places=1, max_digits=4, default=10)
     class Meta:
         unique_together = ("klausur", "nummer")
 
 class Abgabe(models.Model):
     klausur = models.ForeignKey(Klausur, related_name="abgaben", on_delete=models.CASCADE)
     schueler = models.ForeignKey(Schueler, related_name="abgaben", on_delete=models.CASCADE)
+    def punkte(self):
+        return sum(a.punkte for a in self.aufgaben.all())
+    def note(self):
+        percentage = float(round(self.punkte()/self.klausur.total(), 2))
+        note = util.note(percentage)
+        return note
     class Meta:
         unique_together = ("klausur", "schueler")
 

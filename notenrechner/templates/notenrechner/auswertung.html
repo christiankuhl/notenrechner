@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block body %}
+<section class="header">
+  <div class="row">
+    <div class="one column"></div>
+    <div class="ten columns">
+      <a href="{% url 'notenrechner:klasse' klausur.klasse.id %}">
+        Klasse {{ klausur.klasse }}, Klausur Nr. {{ klausur.nummer }}
+      </a>
+      <div class="title">{{ klausur.titel }}</div>
+    </div>
+    <div class="one column">
+      <a href="{% url 'notenrechner:klausur' klausur.id %}" class="button">Zurück zur Eingabe</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="six columns" style="margin-top: 3em">
+      <h5>Der Notendurchschnitt ist {{ klausur.durchschnitt }} und die Klausur ist
+      {% if klausur.zulaessig %}
+        zulässig.
+      {% else %}
+        unzulässig.
+      {% endif %}</h5>
+      {% if detail %}
+      <br />
+      Die besten Abgaben unter 5 Punkten sind
+        <ul style="list-style:none;margin-top:1em">
+          {% for b in klausur.beste_boese %}
+            <li>{{ b.schueler }} mit {{ b.punkte }} von {{ klausur.total }} Punkten</li>
+          {% endfor %}
+        </ul>
+      <a href="{% url 'notenrechner:evaluate' klausur.id %}" class="button">Übersicht</a>
+      {% else %}
+      <a href="{% url 'notenrechner:detail' klausur.id %}" class="button">Details</a>
+      {% endif %}
+    </div>
+    <div class="six columns" style="margin-top: -1em">
+      {{ notenspiegel|safe }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="twelve columns">
+      {% if not detail %}
+      <b>Notenspiegel</b>
+      <table>
+        <thead>
+          <tr>
+            <th>Note</th>
+            {% for k in klausur.notenspiegel.keys %}
+            <th>{{k}}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Von</th>
+            {% for rng in klausur.kriterien.values %}
+              <td>{{ rng.0 }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th>Bis</th>
+            {% for rng in klausur.kriterien.values %}
+              <td>{{ rng.0 }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th>Anzahl</th>
+            {% for n in klausur.notenspiegel.values %}
+            <td>{{n}}</td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+      {% else %}
+      <b>Einzelergebnisse</b>
+      <table>
+        <thead>
+          <tr>
+            <th>Schüler</th>
+            <th>Punkte</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for abgabe in klausur.abgaben.all %}
+            <tr>
+              <td>{{ abgabe.schueler }}</td>
+              <td>{{ abgabe.punkte }}</td>
+              <td>{{ abgabe.note }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

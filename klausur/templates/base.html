@@ -41,7 +41,7 @@
     <nav class="navbar">
       <div class="container">
         <ul class="navbar-list">
-          <li class="navbar-item"><a class="navbar-link" href="{% url 'notenrechner:index' %}">Klausur-App</a></li>
+          <li class="navbar-item"><a class="navbar-link" href="{% url 'notenrechner:index' %}">{{app_name}}</a></li>
           {% if not user.is_authenticated %}
           <li class="navbar-item">
             <a class="navbar-link" href="{% url 'auth:login' %}">Login</a> {% else %}

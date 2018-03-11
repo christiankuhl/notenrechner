@@ -2,34 +2,71 @@
 
 {% load static %}
 
-{% block css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/formfields.css' %}">
-{% endblock %}
+{% load formset_tags %}
 
 {% block body %}
 <section class="header">
-  <div class="row">
-    <div class="title">{{ content_title }}</div>
-    <div class="one column"></div>
-    <div class="ten columns">
-      <form action="{{ form_action }}" method=post>
-        {% csrf_token %}
-        <table class="formfields">
-        </table>
-        <input type="submit" value="Anlegen">
+  <form action="{{ form_action }}" method=post>
+    {% csrf_token %}
+    <div class="row">
+      <div class="one column"></div>
+      <div class="ten columns">
+        <a href="{% url 'notenrechner:klasse' klausur.klasse.id %}">
+          Klasse {{ klausur.klasse }}, Klausur Nr. {{ klausur.nummer }}
+        </a>
+        <div class="title">{{ klausur.titel }}</div>
+      </div>
+      <div class="one column">
+        <input type="submit" value="Speichern und Auswerten">
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <table class="formfields">
-      {{ form }}
+  <div class="row" id="formset" data-formset-prefix="{{ formset.prefix }}">
+      <table>
+        {{ formset.media }}
+        <thead>
+          <tr>
+            <th></th>
+            {% for field in form.visible_fields %}
+            <th>{{ field.label_tag }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody data-formset-body>
+          <tr>
+            <td><b>Maximalpunktzahl:</b></td>
+            {% for field in form.visible_fields %}
+            <td>{{ field }}</td>
+            {% endfor %}
+          </tr>
+        {{ formset.management_form }}
+        {% for abgabe in formset.forms %}
+          <tr data-formset-form>
+            {% for field in abgabe.visible_fields %}
+              <td>{{ field }}</td>
+            {% endfor %}
+            <td><input type="button" value="+" data-formset-add></td>
+            <td><button type="button" data-formset-delete-button>-</button></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <script type="form-template" data-formset-empty-form>
+        {% escapescript %}
+          <tr data-formset-form>
+            {% for field in formset.empty_form.visible_fields %}
+              <td>{{ field }}</td>
+            {% endfor %}
+            <td><input type="button" value="+" data-formset-add></td>
+            <td><button type="button" data-formset-delete-button>-</button></td>
+          </tr>
+        {% endescapescript %}
+    </script>
+    <script>jQuery(function($) {
+        $("#formset").formset({
+            animateForms: true
+        });
+    });</script>
     </table>
-    <table class="formfields">
-      {{ formset.management_form }}
-      {% for abgabe in formset.forms %}
-        {{ abgabe }}
-      {% endfor %}
-    </table>
-  </form>
   </div>
+</form>
 </section>
 {% endblock %}

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from notenrechner.models import Klasse, Schueler, Klausur, Aufgabe
-from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabenForm#, AufgabenInlineFormSet
+from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabenForm, AufgabenFormSet
 from django.forms import formset_factory
 
 @login_required
@@ -49,28 +49,44 @@ def view_klassen(request):
 @login_required
 def view_klausur(request, klausur_id):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
-    AufgabenFormSet = formset_factory(AufgabenForm)
     initial = [{**{"schueler": abg.schueler},
                 **{"aufgabe_{}".format(a.aufgabe.nummer): a.punkte
                                 for a in abg.aufgaben.all()}}
                                     for abg in klausur.abgaben.all()]
+    max_punkte = {"aufgabe_{}".format(a.nummer): a.max_punkte for a in klausur.aufgaben.all()}
     if request.method == "POST":
-        form = AufgabenForm(klausur, data=request.POST)
+        form = AufgabenForm(klausur=klausur,
+                            initial=max_punkte,
+                            data=request.POST)
         formset =  AufgabenFormSet(initial=initial,
                                    data=request.POST,
                                    form_kwargs={"klausur": klausur,
                                                 "create_abgabe": True})
-        # if form.is_valid():
-        #     form.save()
+        if form.is_valid():
+            form.save()
         if formset.is_valid():
             for aufg_form in formset:
                 aufg_form.save()
+        if form.is_valid() and formset.is_valid():
+            return redirect("notenrechner:evaluate", klausur_id=klausur.id)
     else:
-        form = AufgabenForm(klausur)
+        form = AufgabenForm(klausur=klausur, initial=max_punkte)
         formset = AufgabenFormSet(initial=initial, form_kwargs={"klausur": klausur, "create_abgabe": True})
-    # return HttpResponse(formset)
     return render(request, "notenrechner/klausur.html", {"form": form,
-                                                         "formset": formset})
+                                                         "formset": formset,
+                                                         "klausur": klausur})
+
+@login_required
+def klausur_evaluation(request, klausur_id, detail=False):
+    klausur = get_object_or_404(Klausur, pk=klausur_id)
+    notenspiegel = notenspiegel_html(klausur)
+    return render(request, "notenrechner/auswertung.html", {"klausur": klausur,
+                                                            "notenspiegel": notenspiegel,
+                                                            "detail": detail})
+
+@login_required
+def klausur_detail(request, klausur_id):
+    return klausur_evaluation(request, klausur_id, detail=True)
 
 @login_required
 def view_klausuren(request):
@@ -93,10 +109,24 @@ def view_klausuren(request):
 
 def index(request):
     if not request.user.is_authenticated:
-        greeting = " zur Klausur-App"
+        greeting = " zu {}".APP_NAME
     else:
         greeting = ", {}".format(request.user.first_name)
     return render(request, "notenrechner/index.html", {"greeting": greeting})
+
+def notenspiegel_html(klausur):
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.pyplot import hist, title, xlabel, ylabel, xticks, close, figure
+    import mpld3
+    fig = figure(111, figsize=(4,3))
+    xlabel("Note")
+    ylabel("Frequenz")
+    bins = [r - .5 for r in range(17)]
+    xticks(range(16))
+    hist([a.note() for a in klausur.abgaben.all()], bins=bins, facecolor='blue', alpha=0.5)
+    canvas = FigureCanvas(fig)
+    html = mpld3.fig_to_html(fig)
+    return html
 
 @login_required
 def overview(request):
