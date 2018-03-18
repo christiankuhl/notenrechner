@@ -70,7 +70,7 @@ class Klausur(models.Model):
 class Aufgabe(models.Model):
     klausur = models.ForeignKey(Klausur, related_name="aufgaben", on_delete=models.CASCADE)
     nummer = models.PositiveSmallIntegerField()
-    max_punkte = models.DecimalField(decimal_places=1, max_digits=4, default=10)
+    max_punkte = models.DecimalField(decimal_places=1, max_digits=4, default=10, null=True)
     class Meta:
         unique_together = ("klausur", "nummer")
 

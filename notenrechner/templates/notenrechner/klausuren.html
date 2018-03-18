@@ -1,4 +1,5 @@
 {% extends "notenrechner/model_base.html" %}
+
 {% block content %}
 <table>
   <thead>
@@ -9,6 +10,8 @@
       <th>Titel</th>
       <th>Anzahl Aufgaben</th>
       <th>Anzahl Abgaben</th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -20,6 +23,8 @@
       <td><a href="{% url 'notenrechner:klausur' klausur.id %}">{{klausur.titel}}</h></td>
       <td>{{klausur.anzahl_aufgaben}}</td>
       <td>{{klausur.anzahl_abgaben}}</td>
+      <td><a class="glyphicon" href="{% url 'notenrechner:edit_klausur' klausur.id %}">&#x270f;</a></td>
+      <td><a class="glyphicon add_del open-modal" action="{% url 'notenrechner:delete' klausur.id %}">&#xe020;</a></td>
     </tr>
     {% endfor %}
   </tbody>

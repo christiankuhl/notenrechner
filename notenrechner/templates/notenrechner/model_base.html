@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block css %}
+<link rel="stylesheet" type='text/css' href="{% static 'css/modal.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'css/formfields.css' %}">
 {% endblock %}
 
@@ -12,12 +13,12 @@
     <div class="title">{{ content_title }}</div>
     <div class="one column"></div>
     <div class="ten columns">
-      <form action="{{ form_action }}" method=post>
+      <form action="" method=post>
         {% csrf_token %}
         <table class="formfields">
           {{ form }}
         </table>
-        <input type="submit" value="Anlegen">
+        <input type="submit" value="{% if form_action %}{{ form_action }}{% else %}Anlegen{% endif %}">
       </form>
     </div>
   </div>
@@ -26,4 +27,25 @@
     {% endblock %}
   </div>
 </section>
+<div class="modal modal-open">
+  <div class="modal-inner">
+    <div class="modal-content">
+      <div class="modal-close-icon">
+        <a href="javascript:void(0)" class="close-modal" aria-hidden="true">&times;</a>
+      </div>
+      <div class="modal-content-inner">
+      </div>
+      <hr class="modal-buttons-separator">
+      <div class="modal-buttons">
+        <form id="modal-decision" method="post">
+          {% csrf_token %}
+          <a class="button close-modal">Abbruch</a>
+          <button class="button button-primary close-modal">OK</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% load static %}
+<script type="text/javascript" src="{% static 'js/modal.js' %}"></script>
 {% endblock %}

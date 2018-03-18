@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from notenrechner.models import Klasse, Schueler, Klausur, Aufgabe
 from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabenForm, AufgabenFormSet
-# from django.forms import formset_factory
+from klausur.constants import APP_NAME
 
 @login_required
 def view_klasse(request, klassen_id):
@@ -65,8 +65,7 @@ def view_klausur(request, klausur_id):
         if form.is_valid():
             form.save()
         if formset.is_valid():
-            for aufg_form in formset:
-                aufg_form.save()
+            formset.save()
         if form.is_valid() and formset.is_valid():
             return redirect("notenrechner:evaluate", klausur_id=klausur.id)
     else:
@@ -75,6 +74,21 @@ def view_klausur(request, klausur_id):
     return render(request, "notenrechner/klausur.html", {"form": form,
                                                          "formset": formset,
                                                          "klausur": klausur})
+
+@login_required
+def edit_klausur(request, klausur_id):
+    klausur = get_object_or_404(Klausur, pk=klausur_id)
+    klausuren = Klausur.objects.all()
+    form = KlausurForm(request.POST or None, instance=klausur)
+    if request.method == "POST":
+        if form.is_valid():
+            klausur = form.save()
+            return redirect("notenrechner:klausur", klausur_id=klausur.id)
+    return render(request, "notenrechner/klausuren.html",
+                  {"form": form,
+                   "form_action": "Speichern",
+                   "content_title": "Klausur ändern",
+                   "klausuren": klausuren})
 
 @login_required
 def klausur_evaluation(request, klausur_id, detail=False):
@@ -109,7 +123,7 @@ def view_klausuren(request):
 
 def index(request):
     if not request.user.is_authenticated:
-        greeting = " zu {}".APP_NAME
+        greeting = " zu {}".format(APP_NAME)
     else:
         greeting = ", {}".format(request.user.first_name)
     return render(request, "notenrechner/index.html", {"greeting": greeting})
@@ -130,4 +144,28 @@ def notenspiegel_html(klausur):
 
 @login_required
 def overview(request):
-    return HttpResponse("Hello, world!")
+    return view_klausuren(request)
+
+@login_required
+def view_schueler(request, schueler_id):
+    pass
+
+@login_required
+def edit_schueler(request, schueler_id):
+    pass
+
+@login_required
+def delete_schueler(request, schueler_id):
+    pass
+
+@login_required
+def delete_klausur(request, klausur_id):
+    klausur = get_object_or_404(Klausur, pk=klausur_id)
+    if request.method == "GET":
+        dialog_text = "Soll die Klausur \"{}\" ({}) wirklich gelöscht werden?".format(klausur.titel,
+                                                                                 klausur.klasse)
+        return render(request, "notenrechner/dialog.html", {"dialog_heading": "Klausur löschen?",
+                                                            "dialog_text": dialog_text})
+    elif request.method == "POST":
+        klausur.delete()
+        return redirect("notenrechner:klausuren")

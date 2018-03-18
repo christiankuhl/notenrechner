@@ -5,6 +5,8 @@
     <tr>
       <th>Vorname</th>
       <th>Nachname</th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -12,6 +14,8 @@
     <tr>
       <td>{{schueler.vorname}}</td>
       <td>{{schueler.nachname}}</td>
+      <td><a class="glyphicon" href="{% url 'notenrechner:edit_schueler' schueler.id %}">&#x270f;</a></td>
+      <td><a class="glyphicon add_del open-modal" href="{% url 'notenrechner:delete_schueler' schueler.id %}">&#xe020;</a></td>
     </tr>
     {% endfor %}
   </tbody>

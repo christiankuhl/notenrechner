@@ -21,6 +21,7 @@
       </div>
     </div>
   <div class="row" id="formset" data-formset-prefix="{{ formset.prefix }}">
+      {{ formset.non_form_errors }}
       <table>
         {{ formset.media }}
         <thead>
@@ -41,11 +42,12 @@
         {{ formset.management_form }}
         {% for abgabe in formset.forms %}
           <tr data-formset-form>
+            {{ abgabe.non_field_errors }}
             {% for field in abgabe.visible_fields %}
               <td>{{ field }}</td>
             {% endfor %}
-            <td><input type="button" value="+" data-formset-add></td>
-            <td><button type="button" data-formset-delete-button>-</button></td>
+            <td><button type="button" class="glyphicon add_del" data-formset-add>&#x002b;</td>
+            <td><button type="button" class="glyphicon add_del" data-formset-delete-button>&#x2212;</button></td>
           </tr>
         {% endfor %}
       </tbody>
@@ -55,8 +57,8 @@
             {% for field in formset.empty_form.visible_fields %}
               <td>{{ field }}</td>
             {% endfor %}
-            <td><input type="button" value="+" data-formset-add></td>
-            <td><button type="button" data-formset-delete-button>-</button></td>
+            <td><button type="button" class="glyphicon add_del" data-formset-add>&#x002b;</td>
+            <td><button type="button" class="glyphicon add_del" data-formset-delete-button>&#x2212;</button></td>
           </tr>
         {% endescapescript %}
     </script>
