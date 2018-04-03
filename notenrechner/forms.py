@@ -16,7 +16,8 @@ class KlassenForm(forms.ModelForm):
 
 class KlausurForm(forms.ModelForm):
     def save(self):
-        klausur = super(KlausurForm, self).save()
+        klausur, created = Klausur.objects.get_or_create(**self.cleaned_data)
+        klausur.save()
         for nummer in range(1, self.cleaned_data["anzahl_aufgaben"]+1):
             aufg, created = Aufgabe.objects.get_or_create(klausur=klausur,
                                                           nummer=nummer)
@@ -27,9 +28,12 @@ class KlausurForm(forms.ModelForm):
         model = Klausur
         exclude = []
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user")
         super(KlausurForm, self).__init__(*args, **kwargs)
         self.fields["anzahl_aufgaben"].widget.attrs["style"] = "width:70px"
         self.fields["nummer"].widget.attrs["style"] = "width:70px"
+        self.fields["fach"].choices = list(user.profile.faecher.values_list())
+        self.fields["fach"].choices.insert(0, ('', u'---------'))
 
 class AufgabenForm(forms.Form):
     def __init__(self, klausur, create_abgabe=False, *args, **kwargs):
@@ -42,9 +46,10 @@ class AufgabenForm(forms.Form):
                 value = initial.get("schueler")
             else:
                 value = None
-            self.fields["schueler"] = forms.ModelChoiceField(self.klausur.klasse.schueler.all(),
-                                                                        label="", required=False,
-                                                                        initial=value)
+            queryset = (self.klausur.klasse.schueler.all() | self.klausur.teilnehmer()).distinct()
+            self.fields["schueler"] = forms.ModelChoiceField(queryset,
+                                                             label="", required=False,
+                                                             initial=value)
         for aufg in klausur.aufgaben.all():
             field_id = "aufgabe_{}".format(aufg.nummer)
             if create_abgabe:

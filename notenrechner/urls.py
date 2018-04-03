@@ -15,5 +15,7 @@ urlpatterns = [
         path("klasse/<int:klassen_id>", views.view_klasse, name="klasse"),
         path("schueler/<int:schueler_id>/edit", views.edit_schueler, name="edit_schueler"),
         path("schueler/<int:schueler_id>", views.view_schueler, name="schueler"),
-        path("schueler/<int:schueler_id>/edit", views.delete_schueler, name="delete_schueler"),
+        path("schueler/<int:schueler_id>/delete", views.delete_schueler, name="delete_schueler"),
+        path("klasse/<int:klassen_id>/delete/<int:schueler_id>", views.delete_schueler, 
+                                                                name="delete_from_class"),
     ]

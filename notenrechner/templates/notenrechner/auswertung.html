@@ -18,20 +18,23 @@
   </div>
   <div class="row">
     <div class="six columns" style="margin-top: 3em">
-      <h5>Der Notendurchschnitt ist {{ klausur.durchschnitt }} und die Klausur ist
+      <h5>Der Notendurchschnitt ist {{ klausur.durchschnitt }} (Standardabweichung
+        {{ klausur.standardabweichung }}) <br />und die Klausur ist
       {% if klausur.zulaessig %}
         zulässig.
       {% else %}
         unzulässig.
       {% endif %}</h5>
       {% if detail %}
-      <br />
-      Die besten Abgaben unter 5 Punkten sind
-        <ul style="list-style:none;margin-top:1em">
-          {% for b in klausur.beste_boese %}
-            <li>{{ b.schueler }} mit {{ b.punkte }} von {{ klausur.total }} Punkten</li>
-          {% endfor %}
-        </ul>
+        {% if not klausur.zulaessig %}
+        <br />
+        Die besten Abgaben unter 5 Punkten sind
+          <ul style="list-style:none;margin-top:1em">
+            {% for b in klausur.beste_boese %}
+              <li>{{ b.schueler }} mit {{ b.punkte }} von {{ klausur.total }} Punkten</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
       <a href="{% url 'notenrechner:evaluate' klausur.id %}" class="button">Übersicht</a>
       {% else %}
       <a href="{% url 'notenrechner:detail' klausur.id %}" class="button">Details</a>
@@ -64,7 +67,7 @@
           <tr>
             <th>Bis</th>
             {% for rng in klausur.kriterien.values %}
-              <td>{{ rng.0 }}</td>
+              <td>{{ rng.1 }}</td>
             {% endfor %}
           </tr>
           <tr>

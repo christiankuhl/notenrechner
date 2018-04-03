@@ -4,8 +4,15 @@ from django.contrib.auth.decorators import login_required
 from notenrechner.models import Klasse, Schueler, Klausur, Aufgabe
 from notenrechner.forms import KlassenForm, SchuelerForm, KlausurForm, AufgabenForm, AufgabenFormSet
 from klausur.constants import APP_NAME
+from accounts.models import restricted_to_owner
+from django.template.defaulttags import register
+
+@register.filter
+def get(dictionary, key):
+    return dictionary.get(key)
 
 @login_required
+@restricted_to_owner
 def view_klasse(request, klassen_id):
     klasse = get_object_or_404(Klasse, pk=klassen_id)
     title = "Klasse {}, {}".format(klasse.name, klasse.jahrgang)
@@ -28,12 +35,14 @@ def view_klasse(request, klassen_id):
                        "klasse": klasse})
 
 @login_required
+@restricted_to_owner
 def view_klassen(request):
     klassen = Klasse.objects.all()
     if request.method == "POST":
         form = KlassenForm(request.POST)
         if form.is_valid():
-            klasse = form.save()
+            klasse, created = Klasse.objects.get_or_create(**form.cleaned_data)
+            klasse.save()
             return redirect("notenrechner:klasse", klassen_id=klasse.id)
         else:
             return render(request, "notenrechner/klassen.html",
@@ -47,6 +56,7 @@ def view_klassen(request):
                        "klassen": klassen})
 
 @login_required
+@restricted_to_owner
 def view_klausur(request, klausur_id):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
     initial = [{**{"schueler": abg.schueler},
@@ -76,6 +86,7 @@ def view_klausur(request, klausur_id):
                                                          "klausur": klausur})
 
 @login_required
+@restricted_to_owner
 def edit_klausur(request, klausur_id):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
     klausuren = Klausur.objects.all()
@@ -91,6 +102,7 @@ def edit_klausur(request, klausur_id):
                    "klausuren": klausuren})
 
 @login_required
+@restricted_to_owner
 def klausur_evaluation(request, klausur_id, detail=False):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
     notenspiegel = notenspiegel_html(klausur)
@@ -99,14 +111,16 @@ def klausur_evaluation(request, klausur_id, detail=False):
                                                             "detail": detail})
 
 @login_required
+@restricted_to_owner
 def klausur_detail(request, klausur_id):
     return klausur_evaluation(request, klausur_id, detail=True)
 
 @login_required
+@restricted_to_owner
 def view_klausuren(request):
     klausuren = Klausur.objects.all()
+    form = KlausurForm(request.POST or None, user=request.user)
     if request.method == "POST":
-        form = KlausurForm(request.POST)
         if form.is_valid():
             klausur = form.save()
             return redirect("notenrechner:klausur", klausur_id=klausur.id)
@@ -117,7 +131,7 @@ def view_klausuren(request):
                            "klausuren": klausuren})
     else:
         return render(request, "notenrechner/klausuren.html",
-                      {"form": KlausurForm,
+                      {"form": form,
                        "content_title": "Klausuren",
                        "klausuren": klausuren})
 
@@ -143,22 +157,45 @@ def notenspiegel_html(klausur):
     return html
 
 @login_required
+@restricted_to_owner
 def overview(request):
     return view_klausuren(request)
 
 @login_required
+@restricted_to_owner
 def view_schueler(request, schueler_id):
     pass
 
 @login_required
+@restricted_to_owner
 def edit_schueler(request, schueler_id):
     pass
 
 @login_required
-def delete_schueler(request, schueler_id):
-    pass
+@restricted_to_owner
+def delete_schueler(request, schueler_id, klassen_id=None):
+    schueler = get_object_or_404(Schueler, pk=schueler_id)
+    if klassen_id:
+        klasse = get_object_or_404(Klasse, pk=klassen_id)
+        if request.method == "GET":
+            dialog_text = "Schüler {} wirklich aus der Klasse {} entfernen?".format(schueler,
+                                                                                    klasse)
+            return render(request, "notenrechner/dialog.html", {"dialog_heading": "Schüler entfernen?",
+                                                                "dialog_text": dialog_text})
+        elif request.method == "POST":
+            schueler.klassen.remove(klasse)
+            return redirect("notenrechner:klasse", klassen_id=klassen_id)
+    else:
+        if request.method == "GET":
+            dialog_text = "Schüler {} wirklich löschen?".format(schueler)
+            return render(request, "notenrechner/dialog.html", {"dialog_heading": "Schüler löschen?",
+                                                                "dialog_text": dialog_text})
+        elif request.method == "POST":
+            schueler.delete()
+            return redirect("notenrechner:klassen")
 
 @login_required
+@restricted_to_owner
 def delete_klausur(request, klausur_id):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
     if request.method == "GET":

@@ -7,6 +7,11 @@
       <th>Nachname</th>
       <th></th>
       <th></th>
+      {% for fach, klausuren in klasse.klausurliste.items %}
+        {% for klausur in klausuren %}
+          <th>{{ klausur.nummer }}. "{{ klausur.titel }}"</th>
+        {% endfor %}
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
@@ -15,7 +20,12 @@
       <td>{{schueler.vorname}}</td>
       <td>{{schueler.nachname}}</td>
       <td><a class="glyphicon" href="{% url 'notenrechner:edit_schueler' schueler.id %}">&#x270f;</a></td>
-      <td><a class="glyphicon add_del open-modal" href="{% url 'notenrechner:delete_schueler' schueler.id %}">&#xe020;</a></td>
+      <td><a class="glyphicon add_del open-modal" action="{% url 'notenrechner:delete_from_class' klasse.id schueler.id %}">&#xe020;</a></td>
+      {% for fach, klausuren in klasse.klausurliste.items %}
+        {% for klausur in klausuren %}
+          <td>{{ schueler.klausurergebnisse | get:klausur }}</td>
+        {% endfor %}
+      {% endfor %}
     </tr>
     {% endfor %}
   </tbody>

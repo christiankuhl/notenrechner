@@ -20,6 +20,7 @@
   <link rel="stylesheet" type='text/css' href="{% static 'css/normalize.min.css' %}">
   <link rel="stylesheet" type='text/css' href="{% static 'css/skeleton.min.css' %}">
   <link rel="stylesheet" type='text/css' href="{% static 'css/custom.css' %}">
+  <link rel="stylesheet" type='text/css' href="{% static 'css/bounce.css' %}">
   {% block css %}{% endblock %}
   <!-- Scripts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -41,7 +42,12 @@
     <nav class="navbar">
       <div class="container">
         <ul class="navbar-list">
-          <li class="navbar-item"><a class="navbar-link" href="{% url 'notenrechner:index' %}">{{app_name}}</a></li>
+          <li class="navbar-item">
+            <a class="navbar-link bouncey_right" href="{% url 'notenrechner:index' %}">
+              {{app_name}}
+              <img  src="{% static 'img/dango.jpg' %}" width="0px"></img>
+            </a>
+          </li>
           {% if not user.is_authenticated %}
           <li class="navbar-item">
             <a class="navbar-link" href="{% url 'auth:login' %}">Login</a> {% else %}

@@ -1,3 +1,4 @@
 from django.contrib import admin
+from notenrechner.models import Fach
 
-# Register your models here.
+admin.site.register(Fach)

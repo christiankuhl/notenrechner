@@ -1,17 +1,22 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block body %}
 <section class="header">
   <h2 class="title">Willkommen{{ greeting }}.</h2>
   <div class="row">
+    <a href="{% url 'notenrechner:overview' %}">
+      <img class="bouncey" src="{% static 'img/dango.jpg' %}" alt="Sockenella, der Dango" width="40%"></img>
+    </a>
+  </div>
+  <div class="row">
     <div class="three columns value-prop"></div>
     <div class="six columns">
-      <form action="{% url 'notenrechner:overview' %}" method=post>
-        {% csrf_token %}
-        <div>
-          <input type="submit" class="button button-primary" value="Los geht's">
+          <a class="button button-primary" href="{% url 'notenrechner:overview' %}">
+            Los geht's
+          </a>
         </div>
-      </form>
     </div>
   </div>
 </section>
