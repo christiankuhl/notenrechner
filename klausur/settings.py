@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from klausur.private import SECRETKEY, DEBUG_FLAG
+from klausur.private import SECRETKEY, DEBUG_FLAG, ALLOWEDHOSTS
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +26,7 @@ SECRET_KEY = SECRETKEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG_FLAG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ALLOWEDHOSTS
 
 # Application definition
 
@@ -123,7 +123,11 @@ LOGIN_URL = '/auth/login/'
 
 LOGOUT_URL = '/auth/logout/'
 
-
+X_FRAME_OPTIONS = 'DENY'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/

@@ -2,7 +2,7 @@ from django.db import models
 from klausur.constants import RANGES
 from accounts.models import OwnedModel
 from collections import OrderedDict, defaultdict
-from numpy import mean, std
+from statistics import mean, stdev as std
 import klausur.util as util
 
 class Fach(models.Model):
