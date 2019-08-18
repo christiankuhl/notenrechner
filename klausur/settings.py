@@ -119,9 +119,9 @@ USE_L10N = True
 
 USE_TZ = False
 
-LOGIN_URL = '/auth/login/'
+LOGIN_URL = '/klausuren/auth/login/'
 
-LOGOUT_URL = '/auth/logout/'
+LOGOUT_URL = '/klausuren/auth/logout/'
 
 X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True

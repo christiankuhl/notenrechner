@@ -105,7 +105,7 @@ def edit_klausur(request, klausur_id):
 @restricted_to_owner
 def klausur_evaluation(request, klausur_id, detail=False):
     klausur = get_object_or_404(Klausur, pk=klausur_id)
-    notenspiegel = notenspiegel_html(klausur)
+    notenspiegel = None #notenspiegel_html(klausur)
     return render(request, "notenrechner/auswertung.html", {"klausur": klausur,
                                                             "notenspiegel": notenspiegel,
                                                             "detail": detail})
