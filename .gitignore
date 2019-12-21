@@ -9,7 +9,9 @@ __pycache__/
 # private stuff
 *.sh
 klausur/private.py
-db.sqlite3
+*.sqlite3
+*.cmd
+*.sql
 
 # C extensions
 *.so
