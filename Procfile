@@ -1,1 +1,1 @@
-web: gunicorn notenrechner.wsgi
+web: gunicorn klausur.wsgi
